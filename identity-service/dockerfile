@@ -1,0 +1,27 @@
+FROM node:25-slim AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+FROM node:25-slim
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/models ./models
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/graphql ./graphql
+COPY --from=builder /app/server.js ./server.js
+
+EXPOSE 4000
+
+USER node
+
+CMD ["node", "server.js"]

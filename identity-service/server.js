@@ -9,6 +9,7 @@ const { json } = require('body-parser');
 const jwt = require('jsonwebtoken');
 const typeDefs = require('./graphql/typeDefs')
 const resolvers = require('./graphql/resolvers')
+
 require('dotenv').config();
 
 async function startServer() {

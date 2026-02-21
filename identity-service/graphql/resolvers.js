@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const SECRET = 'YOUR_ULTRA_SECURE_SECRET';
 
 const resolvers = {
   Query: {
@@ -24,7 +23,7 @@ const resolvers = {
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) throw new Error('Invalid password');
 
-      const token = jwt.sign({ id: user.id }, SECRET);
+      const token = jwt.sign({ id: user.id }, process.env.ACCESS_SECRET);
       return { token, user };
     }
   }

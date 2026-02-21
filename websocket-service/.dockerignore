@@ -1,0 +1,12 @@
+# Binaries
+bin/
+ws-service
+*.exe
+
+# Local dependencies
+vendor/
+
+# Environment and Git
+.env
+.git
+.dockerignore
