@@ -13,11 +13,15 @@ const typeDefs = gql`
 
   type Query {
     me: User
+    users: [User!] 
+    user(id: ID!): User
   }
 
   type Mutation {
     signup(email: String!, password: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
+    updateUser(email: String, password: String): User!
+    deleteUser: Boolean!
   }
 `;
 

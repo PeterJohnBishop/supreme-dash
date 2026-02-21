@@ -1,6 +1,7 @@
 const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@as-integrations/express5');
 const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
+const { ApolloServerPluginLandingPageLocalDefault } = require('@apollo/server/plugin/landingPage/default');
 const mongoose = require('mongoose');
 const express = require('express');
 const http = require('http');
@@ -14,10 +15,14 @@ require('dotenv').config();
 
 async function startServer() {
   const app = express();
-  
+  const httpServer = http.createServer(app);
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+    ],
   });
 
   await server.start();
@@ -31,21 +36,20 @@ await mongoose.connect(process.env.MONGODB_URI);
       context: async ({ req }) => {
         const auth = req.headers.authorization || '';
         const token = auth.replace('Bearer ', '');
-        if (!token) return {};
+        if (!token) return { user: null };
 
         try {
-          const user = jwt.verify(token, process.env.ACCESS_SECRET);
-          return { user };
+          const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
+          return { user: decoded };
         } catch (e) {
-          return {};
+          return { user: null };
         }
       },
     })
   );
   
-  app.listen(4000, () => {
-    console.log(`Server ready at http://localhost:4000/graphql`);
-  });
+  await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
+  console.log(`Server ready at http://localhost:4000/graphql`);
 }
 
 startServer();

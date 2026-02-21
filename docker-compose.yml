@@ -18,6 +18,7 @@ services:
   ws-service:
     build: ./websocket-service
     environment:
+      - ACCESS_SECRET=${ACCESS_SECRET}
       - PORT=8080
       - GIN_MODE=release
 

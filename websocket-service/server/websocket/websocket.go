@@ -1,10 +1,7 @@
 package websocket
 
 import (
-	"crypto/rand"
-	"fmt"
 	"log"
-	"math/big"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -141,27 +138,11 @@ func (c *Client) WritePump() {
 	}
 }
 
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-func GenerateID() (string, error) {
-	b := make([]byte, 8)
-	for i := range b {
-		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
-		if err != nil {
-			return "", err
-		}
-		b[i] = charset[num.Int64()]
-	}
-
-	final := fmt.Sprintf("ws_%s", string(b))
-	return final, nil
-}
-
-func HandleWebsocket(hub *Hub, ctx *gin.Context) {
-	conn, _ := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-	id, err := GenerateID()
+func HandleWebsocket(id string, hub *Hub, ctx *gin.Context) {
+	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
-		log.Fatalf("Error: %s", err)
+		log.Printf("WebSocket upgrade failed for user %s: %v", id, err)
+		return
 	}
 
 	client := &Client{
